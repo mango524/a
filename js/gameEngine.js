@@ -12,7 +12,9 @@ class GameEngine {
     this.score = 0;
     this.level = 1;
     this.timeLimit = 60;
+    this.timeLimit = 60;
     this.isGameActive = false;
+    this.isGameOver = false; // Game Over state
 
     // Game Objects
     this.basket = { x: 100, y: 180, width: 40, height: 20, color: "blue", position: "CENTER" };
@@ -43,6 +45,7 @@ class GameEngine {
    */
   start(config = {}) {
     this.isGameActive = true;
+    this.isGameOver = false;
     this.score = 0;
     this.level = 1;
     this.timeLimit = config.timeLimit || 60;
@@ -60,6 +63,7 @@ class GameEngine {
    */
   stop() {
     this.isGameActive = false;
+    this.isGameOver = true;
     this.clearTimer();
     if (this.onGameEnd) {
       this.onGameEnd(this.score, this.level);
@@ -199,16 +203,17 @@ class GameEngine {
    * @param {CanvasRenderingContext2D} ctx 
    */
   render(ctx) {
-    if (!this.isGameActive) return;
+    if (!this.isGameActive && !this.isGameOver) return;
 
-    // Draw Basket
-    ctx.fillStyle = this.basket.color;
-    ctx.fillRect(this.basket.x - 20, this.basket.y, 40, 10);
+    // Draw Basket (Emoji)
+    ctx.font = "30px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🧺", this.basket.x, this.basket.y);
 
-    // Draw Basket Label (Optional)
-    ctx.fillStyle = "white";
-    ctx.font = "10px Arial";
-    ctx.fillText("Basket", this.basket.x - 15, this.basket.y + 8);
+    // Reset text align for other elements if needed
+    ctx.textAlign = "start";
+    ctx.textBaseline = "alphabetic";
 
     // Draw Items
     for (const item of this.items) {
@@ -234,6 +239,27 @@ class GameEngine {
     ctx.fillText(`Score: ${this.score}`, 10, 20);
     ctx.fillText(`Time: ${this.timeLimit}`, 150, 20);
     ctx.fillText(`Lv: ${this.level}`, 90, 20);
+
+    // Draw Game Over Screen
+    if (this.isGameOver) {
+      // Semi-transparent background
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+      ctx.fillRect(0, 0, 200, 200);
+
+      // Game Over Text
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.font = "bold 30px Arial";
+      ctx.fillText("GAME OVER", 100, 80);
+
+      // Score Text
+      ctx.fillStyle = "#FF4D80"; // Pink color
+      ctx.font = "bold 24px Arial";
+      ctx.fillText(`Score: ${this.score}`, 100, 120);
+
+      // Reset text align
+      ctx.textAlign = "start";
+    }
   }
 
   onPoseDetected(poseLabel) {
