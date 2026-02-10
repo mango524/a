@@ -31,7 +31,7 @@ async function init() {
 
     // 2. Stabilizer 초기화
     stabilizer = new PredictionStabilizer({
-      threshold: 0.7,
+      threshold: 0.5, // 0.7 -> 0.5로 완화하여 감지율 높임
       smoothingFrames: 3
     });
 
@@ -57,6 +57,11 @@ async function init() {
 
     // 7. PoseEngine 시작
     poseEngine.start();
+
+    // 8. GameEngine 시작
+    if (gameEngine) {
+      gameEngine.start();
+    }
 
     stopBtn.disabled = false;
   } catch (error) {
@@ -129,6 +134,11 @@ function drawPose(pose) {
       tmPose.drawKeypoints(pose.keypoints, minPartConfidence, ctx);
       tmPose.drawSkeleton(pose.keypoints, minPartConfidence, ctx);
     }
+  }
+
+  // 게임 요소 그리기 (웹캠 위에 덧그리기)
+  if (gameEngine && gameEngine.isGameActive) {
+    gameEngine.render(ctx);
   }
 }
 
